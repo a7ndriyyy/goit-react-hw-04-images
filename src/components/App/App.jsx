@@ -37,7 +37,7 @@ const App = () => {
       const loadedImages = response.data.hits;
       setTotalPages(totalPages);
       setImages(prevImages => [...prevImages, ...loadedImages]);
-      setIsLoading(true);
+      setIsLoading(false);
     });
   };
     makeApiCall();
@@ -55,22 +55,6 @@ const App = () => {
     }
    };
 
-  //  const updateState(images, totalPages, add = false) {
-  //   if (add) {
-  //     this.setState(prevState => ({
-  //       totalPages, images: [...prevState.images, ...images],
-  //     }));
-  //   } else {
-  //     setTotalPages(images);
-  //   }
-  //  }
-
-  //  const  componentDidMount() {
-  //       document.addEventListener('keydown', this.handleKeyPress);
-  //   }
-    // const componentWillUnmount() {
-    //     document.removeEventListener('keydown', this.handleKeyPress);
-    // }
 
    const handleImageClick = largeImageUrl => {
      setlargeImageUrl(largeImageUrl);
@@ -87,31 +71,9 @@ const App = () => {
     setIsModalOpen(false);
    };
    
-// const handleKeyPress = event => {
-//   if (event.key === 'Escape' && isModalOpen) {
-//    setIsModalOpen(false);
-//   }
-// };
-
-  //  const getImagesFromUrl = (searchUrl) => {
-  //   axios.get(searchUrl).then(response => {
-  //     const totalPages = Math.round(response.data.totalHits / 12);
-  //     this.setState({ totalPages, images: response.data.hits });
-  //   });
-  //  }
-   
  const  fetchMoreImages = () => {
     setPage(prevPage => prevPage + 1);
    };
-   
-  // const componentDidUpdate (prevProps, prevState) {
-  //   if (
-  //     prevState.query !== query ||
-  //     prevState.page !== page
-  //   ) {
-  //     makeApiCall(query, page);
-  //   }
-  // };
    
 
     return (
