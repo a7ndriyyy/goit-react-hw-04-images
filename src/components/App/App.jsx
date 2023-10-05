@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import {useEffect, useState } from 'react';
 import ImageGallery from '../ImageGallery/ImageGallery';
 import Button from '../Button/Button';
 import Modal from '../Modal/Modal';
@@ -11,129 +11,125 @@ import css from './App.module.css'
 import axios from 'axios';
 
 
- class App extends Component {
-  state = {
-    query: '',
-    page: 1,
-    totalPages: 1,
-    images: [],
-    isLoading: false,
-    isModalOpen: false,
-    largeImageUrl: '',
-  };
-   makeApiCall(query, page) {
-    if (page > this.state.totalPages && page !== 1) {
-      return;
-    }
+const App = () => {
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [largeImageUrl, setlargeImageUrl] = useState('');
+  
+  useEffect(() => {
+    const makeApiCall = () => {
+      if (!query) {
+        return;
+      }
     const PER_PAGE = 12;
     const API_KEY = '39726454-f4ec8b577ca1a4ed4aebbc524';
-     const searchUrl = `https://pixabay.com/api/?q=${encodeURIComponent(
-       query
-     )}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=${PER_PAGE}`;
+    const searchUrl = `https://pixabay.com/api/?q=${encodeURIComponent(
+      query
+    )}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=${PER_PAGE}`;
 
-    this.setState({ isLoading: true });
+    setIsLoading(true);
     axios.get(searchUrl).then(response => {
       const totalPages = Math.round(response.data.totalHits / PER_PAGE);
-      this.updateState(response.data.hits, totalPages, true);
-      this.setState({ isLoading: false });
+      const loadedImages = response.data.hits;
+      setTotalPages(totalPages);
+      setImages(prevImages => [...prevImages, ...loadedImages]);
+      setIsLoading(true);
     });
-  }
+  };
+    makeApiCall();
+  }, [query, page]);
 
-   handleSearch = searchValue => {
+   const handleSearch = searchValue => {
     if (searchValue !== '') {
-      if (searchValue !== this.state.query) {
-        this.setState({ query: searchValue, page: 1, images: [] });
+      if (searchValue !== query) {
+        setQuery(searchValue);
+        setPage(1);
+        setImages([]);
       } else {
-        this.setState({ query: searchValue }, () => {});
+       setQuery(searchValue);
       }
     }
    };
 
-   updateState(images, totalPages, add = false) {
-    if (add) {
-      this.setState(prevState => ({
-        totalPages, images: [...prevState.images, ...images],
-      }));
-    } else {
-      this.setState({ totalPages, images });
-    }
-   }
+  //  const updateState(images, totalPages, add = false) {
+  //   if (add) {
+  //     this.setState(prevState => ({
+  //       totalPages, images: [...prevState.images, ...images],
+  //     }));
+  //   } else {
+  //     setTotalPages(images);
+  //   }
+  //  }
 
-    componentDidMount() {
-        document.addEventListener('keydown', this.handleKeyPress);
-    }
-    componentWillUnmount() {
-        document.removeEventListener('keydown', this.handleKeyPress);
-    }
+  //  const  componentDidMount() {
+  //       document.addEventListener('keydown', this.handleKeyPress);
+  //   }
+    // const componentWillUnmount() {
+    //     document.removeEventListener('keydown', this.handleKeyPress);
+    // }
 
-   handleImageClick = largeImageUrl => {
-     this.setState({
-       largeImageUrl,
-       isModalOpen: true,
-     });
+   const handleImageClick = largeImageUrl => {
+     setlargeImageUrl(largeImageUrl);
+     setIsModalOpen(true);
    };
 
-   handleModalClickClose = event => {
-     if (event.target.id === 'modal' && this.state.isModalOpen) {
-       this.setState({
-         isModalOpen: false,
-       });
+   const handleModalClickClose = event => {
+     if (event.target.id === 'modal' && isModalOpen) {
+    setIsModalOpen(false);
      }
    };
 
-   handleModalClose = () => {
-     this.setState({
-       isModalClose: false,
-     });
+   const handleModalClose = () => {
+    setIsModalOpen(false);
    };
    
-handleKeyPress = event => {
-  if (event.key === 'Escape' && this.state.isModalOpen) {
-    this.setState({
-      isModalOpen: false,
-    });
-  }
-};
+// const handleKeyPress = event => {
+//   if (event.key === 'Escape' && isModalOpen) {
+//    setIsModalOpen(false);
+//   }
+// };
 
-   getImagesFromUrl(searchUrl) {
-    axios.get(searchUrl).then(response => {
-      const totalPages = Math.round(response.data.totalHits / 12);
-      this.setState({ totalPages, images: response.data.hits });
-    });
-   }
+  //  const getImagesFromUrl = (searchUrl) => {
+  //   axios.get(searchUrl).then(response => {
+  //     const totalPages = Math.round(response.data.totalHits / 12);
+  //     this.setState({ totalPages, images: response.data.hits });
+  //   });
+  //  }
    
-  fetchMoreImages = () => {
-    this.setState(prevState => {
-      return { page: prevState.page + 1 };
-    });
+ const  fetchMoreImages = () => {
+    setPage(prevPage => prevPage + 1);
    };
    
-  componentDidUpdate(prevProps,prevState) {
-    if (
-      prevState.query !== this.state.query ||
-      prevState.page !== this.state.page
-    ) {
-      this.makeApiCall(this.state.query, this.state.page);
-    }
-   }
+  // const componentDidUpdate (prevProps, prevState) {
+  //   if (
+  //     prevState.query !== query ||
+  //     prevState.page !== page
+  //   ) {
+  //     makeApiCall(query, page);
+  //   }
+  // };
    
-   render() {
+
     return (
       <div className={css.App}>
-        <Searchbar onSubmit={this.handleSearch} />
+        <Searchbar onSubmit={handleSearch} />
         <ImageGallery
-          images={this.state.images}
-          onModalOpen={this.handleImageClick}
+          images={images}
+          onModalOpen={handleImageClick}
         />
-        {this.state.isModalOpen && (
+        {isModalOpen && (
           <Modal
-            largeImageUrl={this.state.largeImageUrl}
-            onClose={this.handleModalClose}
-            onClickClose={this.handleModalClickClose}
-            id={this.state.images.id}
+            largeImageUrl={largeImageUrl}
+            onClose={handleModalClose}
+            onClickClose={handleModalClickClose}
+            id={images.id}
           />
         )}
-          {this.state.isLoading && (
+          {isLoading && (
           <ColorRing
             visible={true}
             height="80"
@@ -144,12 +140,12 @@ handleKeyPress = event => {
             colors={['#e15b64', '#f47e60', '#f8b26a', '#abbd81', '#849b87']}
           />
         )}
-        {this.state.totalPages > 1 &&
-          this.state.page < this.state.totalPages && (
-            <Button getMoreImage={this.fetchMoreImages} />
+        {totalPages > 1 &&
+          page < totalPages && (
+            <Button getMoreImage={fetchMoreImages} />
           )}
       </div>
     );
   }
-}
+
 export default App;
